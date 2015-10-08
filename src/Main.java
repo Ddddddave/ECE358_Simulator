@@ -29,12 +29,12 @@ public class Main {
 		}
 	}
 	
-	public int next_arrive(){
+	public double next_arrive(){
 		int next_time = 0;
 		return next_time;
 	}
 	
-	public int next_service(){
+	public double next_service(){
 		int next_service = 0;
 		return next_service;
 	}
