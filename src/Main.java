@@ -6,7 +6,7 @@ public class Main {
 	//input parameters
 	static int simDuration = 0; //in ticks
 	static int packetLength = 0;
-	static int bufferSize = 0;
+	static int bufferSize = 5;
 	static double lambda =0;
 	static double serviceTime = 0; //service time received by a packet, bit/seconds, need to be convert to bit/ticks later
 	
@@ -16,11 +16,12 @@ public class Main {
 	static int generateTime = 0;
 	static int serveInterval =0;
 	static int totalPacket = 0;
+	static int packetLoss = 0;
 	static double EN = 0;
 	static double ET = 0;
 	static double pIdle = 0;
 	static double pLoss = 0;
-	
+	static double utilization = 0;
 	public static void main(String[] args) {
 //		Scanner scanner = new Scanner (System.in);
 //		System.out.print("Enter the time duration of simulation");  
@@ -34,41 +35,39 @@ public class Main {
 //		System.out.print("Enter the buffer size"); 
 //		bufferSize = Integer.parseInt(scanner.next());
 		
-		simDuration = 1 * 100000;
-		lambda = 100;
-		packetLength = 700;
+		simDuration = 1 * 1000000;
+		lambda = 200;
+		packetLength = 5000;
 		serviceTime = 1;
 		
 		
+		utilization = (packetLength*lambda)/(serviceTime*1000000);
 		serveInterval = (int)(packetLength/serviceTime);
 		generateTime = (int) nextArrive(lambda);
 		
-//		System.out.println(simDuration);
-//		System.out.println(serveInterval);
-//		System.out.println(generateTime);
-		//for loop
+
 		for(int i = 0; i<simDuration;i++){
 			generatePacket();
-			servePacket();
-			
-			System.out.println("next generation time"+ generateTime);
-			System.out.println("next serve time"+ serveInterval);
-			System.out.println(i);
-			System.out.println(bufferCount);
-			System.out.println(buffer.size());
-			System.out.println("");
+			servePacket();			
 			generateTime--;
 			if(bufferCount > 0){
 				serveInterval--;
 			}
 		}
+		System.out.println(packetLoss);
+		System.out.println(totalPacket);
+		System.out.println(utilization);
 	}
 	
 	public static void generatePacket(){
 		if(generateTime ==0){
-			generateTime = (int) nextArrive(lambda);
-			buffer.add((double) 1);
-			bufferCount++;
+			if(bufferCount == bufferSize){
+				packetLoss++;
+			}else{
+				buffer.add((double) 1);
+				bufferCount++;
+			}
+			generateTime = (int) nextArrive(lambda);					
 			totalPacket++;
 		}
 	}
@@ -83,7 +82,7 @@ public class Main {
 	
 	public static double nextArrive(double lambda){
 		//(-1/lambda)* ln(1-U)
-		return (-1/lambda)* Math.log(1- Math.random())*100000;
+		return (-1/lambda)* Math.log(1- Math.random())*1000000;
 	}
 
 }
