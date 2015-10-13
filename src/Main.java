@@ -7,7 +7,7 @@ public class Main {
 	static int simDuration = 0; //in ticks
 	static int packetLength = 0;
 	static int bufferSize = 5;
-	static double lambda =0;
+	static double lambda = 0;
 	static double serviceTime = 0; //service time received by a packet, bit/seconds, need to be convert to bit/ticks later
 	
 	//simulation variables
@@ -22,23 +22,25 @@ public class Main {
 	static double pIdle = 0;
 	static double pLoss = 0;
 	static double utilization = 0;
+	static int waitTime = 0;
+	
 	public static void main(String[] args) {
-//		Scanner scanner = new Scanner (System.in);
-//		System.out.print("Enter the time duration of simulation");  
-//		simDuration = Integer.parseInt(scanner.next())*1000000;
-//		System.out.print("Enter the lambda");
-//		lambda = Double.parseDouble(scanner.next());
-//		System.out.print("Enter the length of single packet"); 
-//		packetLength = Integer.parseInt(scanner.next());
-//		System.out.print("Enter the service time received by a packet");
-//		serviceTime = Double.parseDouble(scanner.next())/1000000;
-//		System.out.print("Enter the buffer size"); 
-//		bufferSize = Integer.parseInt(scanner.next());
-		
-		simDuration = 1 * 1000000;
-		lambda = 200;
-		packetLength = 5000;
-		serviceTime = 1;
+		Scanner scanner = new Scanner (System.in);
+		System.out.print("Enter the time duration of simulation");  
+		simDuration = Integer.parseInt(scanner.next())*1000000;
+		System.out.print("Enter the lambda");
+		lambda = Double.parseDouble(scanner.next());
+		System.out.print("Enter the length of single packet"); 
+		packetLength = Integer.parseInt(scanner.next());
+		System.out.print("Enter the service time received by a packet");
+		serviceTime = Double.parseDouble(scanner.next())/1000000;
+		System.out.print("Enter the buffer size"); 
+		bufferSize = Integer.parseInt(scanner.next());	//if bufferSize == -1 then infinite buffer
+
+//		simDuration = 1 * 1000000;
+//		lambda = 200;
+//		packetLength = 5000;
+//		serviceTime = 1;
 		
 		
 		utilization = (packetLength*lambda)/(serviceTime*1000000);
@@ -52,21 +54,40 @@ public class Main {
 			generateTime--;
 			if(bufferCount > 0){
 				serveInterval--;
+			} else {
+				pIdle++;
 			}
+			EN = EN + bufferCount;
 		}
-		System.out.println(packetLoss);
-		System.out.println(totalPacket);
-		System.out.println(utilization);
+		
+		EN = EN/simDuration;
+		ET = waitTime/totalPacket;
+		
+		System.out.println("Packet Loss: " + packetLoss);
+		System.out.println("Total Packets: " + totalPacket);
+		System.out.println("Utilization: " + utilization);
+		System.out.println("Idle Ticks: " + pIdle);
+		System.out.println("Percentage of Idle Ticks: " + (pIdle/simDuration)*100);
+		System.out.println("EN: " + EN);
+		System.out.println("ET: " + ET);
 	}
 	
 	public static void generatePacket(){
 		if(generateTime ==0){
-			if(bufferCount == bufferSize){
-				packetLoss++;
-			}else{
+			if(bufferSize == -1){
 				buffer.add((double) 1);
 				bufferCount++;
+				waitTime = waitTime + bufferCount*(int)(packetLength/serviceTime);
 			}
+			
+			if(bufferCount == bufferSize){
+				packetLoss++;
+			} else {
+				buffer.add((double) 1);
+				bufferCount++;
+				waitTime = waitTime + bufferCount*(int)(packetLength/serviceTime);
+			}		
+			
 			generateTime = (int) nextArrive(lambda);					
 			totalPacket++;
 		}
